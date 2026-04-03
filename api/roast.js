@@ -16,8 +16,18 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // 🔥 safer extraction
+    let roastText = "";
+
+    if (data.output && data.output.length > 0) {
+      const content = data.output[0].content;
+      if (content && content.length > 0) {
+        roastText = content[0].text || content[0].content || "No roast generated";
+      }
+    }
+
     res.status(200).json({
-      roast: data.output[0].content[0].text
+      roast: roastText || "Something went wrong 😅"
     });
 
   } catch (error) {

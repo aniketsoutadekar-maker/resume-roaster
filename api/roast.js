@@ -2,32 +2,27 @@ export default async function handler(req, res) {
   try {
     const { resume } = req.body;
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        input: `Roast this resume in a funny Indian meme style:\n${resume}`
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "user",
+            content: `Roast this resume in a funny Indian meme style:\n${resume}`
+          }
+        ]
       })
     });
 
     const data = await response.json();
 
-    console.log("FULL RESPONSE:", JSON.stringify(data, null, 2)); // 🔥 debug
-
-    // 🔥 safest extraction possible
-    let roastText =
-      data.output_text ||
-      (data.output &&
-        data.output[0] &&
-        data.output[0].content &&
-        data.output[0].content[0] &&
-        (data.output[0].content[0].text ||
-          data.output[0].content[0].content)) ||
-      "No roast generated 😅";
+    const roastText =
+      data.choices?.[0]?.message?.content || "Roast failed 😅";
 
     res.status(200).json({
       roast: roastText
